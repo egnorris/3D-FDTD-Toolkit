@@ -1,0 +1,392 @@
+[
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            0.0,
+            151,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            3.0,
+            151,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            5.0,
+            151,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            9.0,
+            151,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            1.0,
+            151,
+            1
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "10e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            5.5,
+            151,
+            1
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            8.0,
+            151,
+            1
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "25e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            4.0,
+            151,
+            2
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "10e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            8.5,
+            151,
+            2
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "15e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            1.0,
+            151,
+            3
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            4.0,
+            151,
+            3
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "10e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            8.5,
+            151,
+            3
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            0.0,
+            151,
+            4
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "15e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            3.0,
+            151,
+            4
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "15e-10",
+        "material": "chromium",
+        "position": [
+            7.0,
+            151,
+            4
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            0.0,
+            164,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            3.0,
+            164,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            5.0,
+            164,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            9.0,
+            164,
+            0
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            1.0,
+            164,
+            1
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "10e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            5.5,
+            164,
+            1
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            8.0,
+            164,
+            1
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "25e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            4.0,
+            164,
+            2
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "10e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            8.5,
+            164,
+            2
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "15e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            1.0,
+            164,
+            3
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            4.0,
+            164,
+            3
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "10e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            8.5,
+            164,
+            3
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            0.0,
+            164,
+            4
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "15e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            3.0,
+            164,
+            4
+        ]
+    },
+    {
+        "shape": "Rectangle",
+        "radius": "0",
+        "length": "5e-10",
+        "width": "5e-10",
+        "thickness": "125e-10",
+        "material": "gold",
+        "position": [
+            7.0,
+            164,
+            4
+        ]
+    }
+]
