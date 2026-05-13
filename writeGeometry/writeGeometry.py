@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import argparse
 import os
+import json
 from PIL import Image
+import math
 
 def stateAnalysis(s):
         if s == [0,1,0]:
@@ -114,15 +116,70 @@ def loadArray(fname):
     print('Reading Array')
     return np.random.randint(0,2, (5, 10))
 
+
+def getEntry(l,w,t,x,y,z,mat,s,r,stepSize):
+    StepSizeXexponent = 10**(math.floor(math.log(stepSize[0], 10)))
+    StepSizeYexponent = 10**(math.floor(math.log(stepSize[0], 10)))
+    StepSizeZexponent = 10**(math.floor(math.log(stepSize[0], 10)))
+    StepSizeXcoef = int(stepSize[0] / StepSizeXexponent)
+    StepSizeYcoef = int(stepSize[1] / StepSizeYexponent)
+    StepSizeZcoef = int(stepSize[2] / StepSizeZexponent)
+    entry = {
+            "shape": f"{s}",
+            "radius": f"{r}",
+            "length": f"{l * StepSizeXcoef}{str(StepSizeXexponent)[1:]}",
+            "width": f"{w * StepSizeZcoef}{str(StepSizeZexponent)[1:]}",
+            "thickness": f"{int(t * StepSizeYcoef)}{str(StepSizeYexponent)[1:]}",
+            "material": f"{mat}",
+            "position": [x,y,z]
+            }
+    return entry
+
+
+def writeFile(structures, parsedArgs):
+    f = open("io/geometry.json", "w")
+    f.write("[")
+    for k in range(len(parsedArgs['materials'])):
+        x = structures["x"].tolist()
+        z = structures["y"].tolist()
+        l = structures["l"].tolist()
+        for i in range(len(x)-1):
+            e = getEntry(1,l[i],parsedArgs['thickness'][k],x[i],parsedArgs['layer'][k],z[i],
+                parsedArgs['materials'][k],"Rectangle",0, 
+                [parsedArgs['stepx'],parsedArgs['stepy'],parsedArgs['stepz']])
+            json.dump(e, f)
+            f.write(",")
+        i = -1
+        e = getEntry(1,l[i],parsedArgs['thickness'][k],x[i],parsedArgs['layer'][k],z[i],
+            parsedArgs['materials'][k],"Rectangle",0, 
+            [parsedArgs['stepx'],parsedArgs['stepy'],parsedArgs['stepz']])
+        json.dump(e, f)
+        if k == len(parsedArgs['materials'])-1:
+            f.write("]")
+        else:
+            f.write(",")
+    f.close()
+        
+            
+
+
+
 parser = argparse.ArgumentParser(description="write Geometry.json")
 parser.add_argument('-imageFile', type=str, required=False, default=None)
 parser.add_argument('-arrayFile', type=str, required=False, default=None)
+parser.add_argument('-materials', nargs='+', required=False, default=['chromium', 'gold'])
+parser.add_argument('-thickness', nargs='+', required=False, default=[3, 25])
+parser.add_argument('-layer', nargs='+', required=False, default=[151, 164])
+parser.add_argument('-stepx', type=float, default=1E-9)
+parser.add_argument('-stepy', type=float, default=1E-9)
+parser.add_argument('-stepz', type=float, default=1E-9)
 parsedArgs = parser.parse_args().__dict__
 if ((parsedArgs['imageFile'] == None) and (parsedArgs['arrayFile'] == None)):
     print("No image or array input file detected, Running demonstration instead.")
     imageArray = np.random.randint(0,2, (5, 10))
     structures= getStructures(imageArray)
     structurePreview(structures, imageArray, ms = 5)
+    writeFile(structures, parsedArgs)
 
 else:
     if (parsedArgs['imageFile'] != None) and (parsedArgs['arrayFile'] == None):
@@ -150,10 +207,10 @@ else:
             else: 
                 raise Exception(f"{parsedArgs['imageFile']} and {parsedArgs['arrayFile']} not found!")
 
-    print(imageArray)
+
     structures= getStructures(imageArray)
-    print(structures)
     structurePreview(structures, imageArray, ms = 0.1)
+    writeFile(structures, parsedArgs)
 
 
 
