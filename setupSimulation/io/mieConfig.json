@@ -1,0 +1,20 @@
+[
+{
+	"Simulation Directory": "MieScatteringTest"
+
+},
+{
+	"Domain Size": [160, 160, 160],
+	"Space Step": [1e-09, 1e-09, 1e-09],
+	"Number of Time Steps": 8000,
+	"Domain Decomposition": [2, 2, 2],
+	"Number of Wavelengths": 31,
+	"Minimum Wavelength": 300e-09,
+	"Maximum Wavelength": 800e-09,
+	"Antenna Type": 1,
+	"WIDTH": 20e-09,
+	"Antenna Medium": 100,
+	"Center Position": [60, 60, 60],
+	"Movie XY": 15
+}
+]
