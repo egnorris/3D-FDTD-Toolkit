@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-#def scalar_greens_function(k,R,R0):
+
 
 def drawBound(ax, xDom, yDom, xMin=0, yMin=0, xB=20, yB=20, c='red', l='', z=-2):
     #ax.fill([-xB, xDom+xB, xDom+xB, -xB], [-yB, -yB, yDom+yB, yDom+yB], color=c, zorder=z, label=l)
@@ -42,8 +42,21 @@ def visualizeCoordinates(r, r0, d):
     plt.tight_layout()
     plt.savefig("PositionDiagram.png", dpi =200)
 
+def scalar_greens_function(wavelength,R,R0, verbose=False):
     
-    
+    k = 2*np.pi/wavelength
+    temp = np.abs(np.asarray(R) - np.asarray(R0))
+    normed = np.linalg.norm(temp)
+    G0 = np.exp(1j*k*normed)/(4*np.pi*normed)
+    if verbose == True:
+        print("\nScalar Green's Function")
+        print(f"r0: ({R0[0]}nm, {R0[1]}nm, {R0[2]}nm)")
+        print(f"r: ({R[0]}nm, {R[1]}nm, {R[2]}nm) ")
+        print(f"r-r0: ({temp[0]}nm ,{temp[1]}nm, {temp[2]}nm)")
+        print(f"|r-r0|: {normed}nm ")
+        print(f"G0: ({G0:.2e}) nm^-1\n")
+    return G0
+
 
 
 if __name__=="__main__":
@@ -61,8 +74,4 @@ if __name__=="__main__":
     R = [x,y,z]
 
     visualizeCoordinates(R, R0, domain)
-
-
-
-
-    #scalar_greens_function(1,[0,0,0],[0,0,0])
+    scalar_greens_function(800,R,R0, verbose=True)
