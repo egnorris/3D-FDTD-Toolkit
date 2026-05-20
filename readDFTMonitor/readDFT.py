@@ -2,7 +2,7 @@ import argparse
 import json
 import numpy as np
 
-def read_monitor_info(simDIR):
+def read_monitor_info(simDIR, v=False):
     """
         read simDIR/INIDEF/monitors.json and 
         simDIR/INIDEF/pphinfoini.json to find
@@ -17,16 +17,20 @@ def read_monitor_info(simDIR):
     with open(f"{simDIR}/INIDEF/monitors.json", 'r') as file:
         mon_data = json.load(file)
     
+   
     default_monitor_center = ini_data["Center Position"]
     default_monitor_size = ini_data["Domain Size"]
     # Find the total number of available monitors
     num_custom_monitors = len(mon_data["Monitors"])
-    if ini_data["DFT Plot"] == 0:
-        num_default_monitors = 0
-    elif ini_data["DFT Plot"] == 4:
-        num_default_monitors = 3
+    if "DFT Plot" in ini_data:
+        if ini_data["DFT Plot"] == 0:
+            num_default_monitors = 0
+        elif ini_data["DFT Plot"] == 4:
+            num_default_monitors = 3
+        else:
+            num_default_monitors = 1
     else:
-        num_default_monitors = 1
+        num_default_monitors = 0
     monitor_size_list = []
     monitor_center_list = []
     monitor_type_list = []
@@ -56,15 +60,28 @@ def read_monitor_info(simDIR):
     if num_default_monitors > 1:
         planes = ['XY', "XZ", "YZ"]
         for n in range(num_default_monitors):
-            monitor_size_list.append(ini_data["Center Position"])
-            monitor_center_list.append(ini_data["Center Position"])
+            x,y,z = default_monitor_size
+            if planes[n] == 'XY':
+                monitor_size_list.append([x, y, 1])
+            if planes[n] == 'XZ':
+                monitor_size_list.append([x, 1, z])
+            elif planes[n] == 'YZ':
+                monitor_size_list.append([1, y, z])
+            monitor_center_list.append(default_monitor_center)
             monitor_type_list.append("frequency")
             monitor_plane_list.append(planes[n])
             monitor_dim_list.append(2)
             monitor_format_list.append("Default")
     elif num_default_monitors == 1:
-        monitor_size_list.append(ini_data["Center Position"])
-        monitor_center_list.append(ini_data["Center Position"])
+        x,y,z = default_monitor_size
+        p = planes[ini_data["DFT Plot"]-1]
+        if p == 'XY':
+            monitor_size_list.append([x, y, 1])
+        if p == 'XZ':
+            monitor_size_list.append([x, 1, z])
+        elif p == 'YZ':
+            monitor_size_list.append([1, y, z])
+        monitor_center_list.append(default_monitor_center)
         monitor_type_list.append("frequency")
         monitor_plane_list.append(planes[ini_data["DFT Plot"]-1])
         monitor_format_list.append("Default")
@@ -76,6 +93,25 @@ def read_monitor_info(simDIR):
         "plane": monitor_plane_list,
         "dimensions": monitor_dim_list,
         "format": monitor_format_list}
+
+    if v == True:
+        print("\n========================================================================================================")
+        print("Reading INIDEF/monitors.json and INIDEF/pphinfoini.json")
+        print("========================================================================================================")
+        print(f"There are {num_custom_monitors} custom monitors and {num_default_monitors} default monitors Available")
+        for k in range(len(monitor_information_dict["format"])):
+            f = monitor_information_dict["format"][k-1]
+            c = monitor_information_dict["center"][k-1]
+            s = monitor_information_dict["size"][k-1]
+            p = monitor_information_dict["plane"][k-1]
+            d = monitor_information_dict["dimensions"][k-1]
+            print(f"There is a {d}D {f} Custom Monitor in the {p}-plane")
+            print(f"    centered at ({c[0]}nm, {c[1]}nm, {c[2]}nm")
+            print(f"    spans {s[0]}nm along x-axis")
+            print(f"    spans {s[1]}nm along y-axis")
+            print(f"    spans {s[2]}nm along z-axis")
+        print("========================================================================================================\n")
+        
     return monitor_information_dict
     
 
@@ -103,13 +139,15 @@ if __name__=="__main__":
     parser.add_argument('-simDIR', type=str, required=True)
     parser.add_argument('-wl', '--wavelength', nargs='+', required=True)
     parsedArgs = parser.parse_args().__dict__
+    simDIR = parsedArgs["simDIR"]
+    wl = parsedArgs["wavelength"]
 
-    if len(parsedArgs["wavelength"]) == 1:
-        print(f"Reading DFT data from {parsedArgs["simDIR"]} with wavelength: \n    {parsedArgs["wavelength"][0]}nm")
+    if len(wl) == 1:
+        print(f"Reading DFT data from {simDIR} with wavelength: \n    {wl[0]}nm")
     else:
-        print(f"Reading DFT data from {parsedArgs["simDIR"]} with wavelengths:")
-        for i in range(len(parsedArgs["wavelength"])):
-            print(f"    {parsedArgs["wavelength"][i]}nm")
+        print(f"Reading DFT data from {simDIR} with wavelengths:")
+        for i in range(len(wl)):
+            print(f"    {wl[i]}nm")
 
     simDIR = parsedArgs["simDIR"]
-    read_monitor_info(simDIR)
+    read_monitor_info(simDIR, v=True)
