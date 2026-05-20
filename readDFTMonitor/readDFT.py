@@ -2,6 +2,7 @@ import argparse
 import json
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 def read_monitor_info(simDIR, v=False):
     """
@@ -112,11 +113,11 @@ def read_monitor_info(simDIR, v=False):
             p = monitor_information_dict["plane"][k-1]
             d = monitor_information_dict["dimensions"][k-1]
             print(f"There is a {d}D {f} Custom Monitor in the {p}-plane")
-            print(f"    centered at ({c[0]}nm, {c[1]}nm, {c[2]}nm")
+            print(f"    centered at ({c[0]}nm, {c[1]}nm, {c[2]}nm)")
             print(f"    spans {s[0]}nm along x-axis")
             print(f"    spans {s[1]}nm along y-axis")
             print(f"    spans {s[2]}nm along z-axis")
-        print("========================================================================================================")
+
         
     return monitor_information_dict
     
@@ -160,8 +161,8 @@ def get_dft_file(simDIR, wavelengths, v=False):
     for wl in wavelengths:
         custom_monitor_index = 1
         for k in range(len(monitor_information_dict["format"])):
-            f = monitor_information_dict["format"][k-1]
-            p = monitor_information_dict["plane"][k-1]
+            f = monitor_information_dict["format"][k]
+            p = monitor_information_dict["plane"][k]
             if f == "Custom":
                 fname = f"{simDIR}/OUTPUT/DFT/E_DFT_{custom_monitor_index}_WL_{wl}nm.cev"
                 custom_monitor_index += 1
@@ -174,7 +175,8 @@ def get_dft_file(simDIR, wavelengths, v=False):
                 "plane": monitor_information_dict['plane'][k],
                 "dimensions": monitor_information_dict['dimensions'][k],
                 "format": monitor_information_dict['format'][k],
-                "path": fname}
+                "path": fname,
+                "wavelength": wl}
             dft_file_list.append(dft_dict)
 
         
@@ -189,39 +191,155 @@ def get_dft_file(simDIR, wavelengths, v=False):
         print("\n========================================================================================================")
         for k in range(len(dft_file_list)):
             print(f"{dft_file_list[k]['format']} {dft_file_list[k]['plane']}-plane Monitor found at {dft_file_list[k]['path']}")
-        print("========================================================================================================\n")
+            print(f"    Centered at {dft_file_list[k]['center']} with size of {dft_file_list[k]['size']}")
+
 
     return dft_file_list
     
 
 
-def read_dft(simDIR, fname):
+def OpenCEV(filename, plane="XYZ", dtype="float64", ghost=False, vector=True):
+    # need to open FIRST as a 32 bit integer file to grab shape
+    frameShape = list(np.fromfile(filename, dtype=np.int32, count=3))
+    
+    # some files contain "ghost cell"
+    if ghost:
+        frameShape = [i + 1 for i in frameShape]
+
+    # some files have 3 components for each value
+    if vector:
+        frameShape.append(3)
+
+    # adjust frameshape based off plane information:
+    if plane is None or plane.upper() == "XYZ":
+        pass
+    elif plane.upper() == "XY":
+        frameShape.pop(2)
+    elif plane.upper() == "XZ":
+        frameShape.pop(1)
+    elif plane.upper() == "YZ":
+        frameShape.pop(0)
+    else:
+        raise RuntimeError(f"Plane input not recognized: '{plane}'")
+    
+    return np.fromfile(filename, dtype=dtype, offset=12).reshape(*frameShape)
+
+def read_dft(dft_file_dict, v=False):
     """
-        read DFT data from simDIR/OUTPUT/DFT/fname
+        read DFT data from file specified in dft_file_dict['path']
     """
-    print(f"Reading DFT file: simDIR/OUTPUT/DFT/{fname}")
+    dft_data = OpenCEV(dft_file_dict['path'], plane=dft_file_dict['plane'], dtype='complex128', ghost=False, vector=True)
+    if v == True:
+        print("\n========================================================================================================")
+        print(f"Reading {dft_file_dict['format']} DFT data from {dft_file_dict['path']}")
+        print("========================================================================================================")
+        if dft_file_dict['dimensions'] == 1:
+            print(f"{dft_file_dict['plane']} Line centered at ({dft_file_dict['center'][0]}nm, {dft_file_dict['center'][1]}nm, {dft_file_dict['center'][2]}nm) with size of ({dft_file_dict['size'][0]}nm, {dft_file_dict['size'][1]}nm, {dft_file_dict['size'][2]}nm)")
+        elif dft_file_dict['dimensions'] == 2:
+            print(f"{dft_file_dict['plane']} Plane centered at ({dft_file_dict['center'][0]}nm, {dft_file_dict['center'][1]}nm, {dft_file_dict['center'][2]}nm) with size of ({dft_file_dict['size'][0]}nm, {dft_file_dict['size'][1]}nm, {dft_file_dict['size'][2]}nm)")
+        elif dft_file_dict['dimensions'] == 3:
+            print(f"{dft_file_dict['plane']} Cube centered at ({dft_file_dict['center'][0]}nm, {dft_file_dict['center'][1]}nm, {dft_file_dict['center'][2]}nm) with size of ({dft_file_dict['size'][0]}nm, {dft_file_dict['size'][1]}nm, {dft_file_dict['size'][2]}nm)")
+        elif dft_file_dict['dimensions'] == 0:
+            print(f"Point at ({dft_file_dict['center'][0]}nm, {dft_file_dict['center'][1]}nm, {dft_file_dict['center'][2]}nm)")
+
+    return dft_data[:, :, 0].transpose(), dft_data[:, :, 1].transpose(), dft_data[:, :, 2].transpose()
+
+
+
+def magnitude(z):
+    return np.real(np.sqrt(np.real(z)**2 + np.imag(z)**2))
+
+def plot_dft_comp(ax, dft_file_dict, comp=None, vmin=None, vmax=None):
+    Ex, Ey, Ez = read_dft(dft_file_dict)
+    E = np.real(np.abs(Ex**2 + Ey**2 + Ez**2))
+    p = dft_file_dict['plane']
+    dim = dft_file_dict['dimensions']
+    if comp == 'x':
+        E = magnitude(Ex)
+        ax.set_title("$|E_x|$")
+        ax.set_xlabel(f"{p[0]}-axis")
+        ax.set_ylabel(f"{p[1]}-axis")
+    elif comp == 'y':
+        ax.set_yticks([])
+        E = magnitude(Ey)
+        ax.set_title("$|E_y|$")
+        ax.set_xlabel(f"{p[0]}-axis")
+    elif comp == 'z':
+        E = magnitude(Ez)
+        ax.set_yticks([])
+        ax.set_title("$|E_z|$")
+        ax.set_xlabel(f"{p[0]}-axis")
+    else:
+        E = np.real(np.sqrt(Ex**2 + Ey**2 + Ez**2))
+        ax.set_yticks([])
+        ax.set_title("$|E|$")
+        ax.set_xlabel(f"{p[0]}-axis")
+
+
+    if vmin == None:
+        v0 = 0
+    else:
+        v0 = vmin
+    if vmax == None:
+        v1 = np.max(np.real(np.sqrt(Ex**2 + Ey**2 + Ez**2)))
+    else:
+        v1 = vmax
+
+    if dim == 2:
+        cax = ax.imshow(E, cmap='jet', vmin=v0, vmax=v1, origin='lower')
+        if comp == "E":
+            return cax
+        
+        
+        
+
+
 
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Read DFT data")
     parser.add_argument('-simDIR', type=str, required=True)
     parser.add_argument('-wl', '--wavelength', nargs='+', required=True)
+    parser.add_argument('-v', '--verbose', type=str, required=False)
     parsedArgs = parser.parse_args().__dict__
     simDIR = parsedArgs["simDIR"]
+    v = parsedArgs["verbose"]
     wl = parsedArgs["wavelength"]
     if simDIR == '.':
         simDIR = os.getcwd()
     simDIRsep = simDIR.split('/')
-    if len(wl) == 1:
-        print(f"Reading DFT data from ../{simDIRsep[-3]}/{simDIRsep[-2]}/{simDIRsep[-1]} with wavelength: \n    {wl[0]}nm")
-    else:
-        print(f"Reading DFT data from ../{simDIRsep[-3]}/{simDIRsep[-2]}/{simDIRsep[-1]} with wavelengths: ", end='')
-        for i in range(len(wl)):
-            print(f"{wl[i]}nm   ", end='')
-    print('\n')
+    if v == True:
+        print("\n========================================================================================================")
+        print(f"Running readDFT.py")
+        print("========================================================================================================")
+        if len(wl) == 1:
+            print(f"Reading DFT data from ../{simDIRsep[-3]}/{simDIRsep[-2]}/{simDIRsep[-1]} with wavelength: \n    {wl[0]}nm")
+        else:
+            print(f"Reading DFT data from ../{simDIRsep[-3]}/{simDIRsep[-2]}/{simDIRsep[-1]} with wavelengths: ", end='')
+            for i in range(len(wl)):
+                print(f"{wl[i]}nm   ", end='')
+        print('\n')
 
-    #get_availabe_wavlengths(simDIR)
 
-    #simDIR = parsedArgs["simDIR"]
-    #read_monitor_info(simDIR, v=True)
-    get_dft_file(simDIR, wl, v=True)
+
+    dft_file_list =get_dft_file(simDIR, wl, v)
+    os.makedirs(f"{simDIR}/DFTframes", exist_ok=True)
+    for k in range(len(dft_file_list)):
+        Ex, Ey, Ez = read_dft(dft_file_list[k], v)
+        fig, axs = plt.subplots(1,4,figsize=(15, 5), layout='constrained')
+        plot_dft_comp(axs[0], dft_file_list[k], comp='x')
+        plot_dft_comp(axs[1], dft_file_list[k], comp='y')
+        plot_dft_comp(axs[2], dft_file_list[k], comp='z')
+        cax = plot_dft_comp(axs[3], dft_file_list[k], comp='E')
+        fig.colorbar(cax, ax=axs.ravel().tolist(), orientation='horizontal', fraction=0.15, pad=0.1)
+        d = dft_file_list[k]
+        wl = d['wavelength']
+        p =  d['plane']
+        c =  d['center']
+        f = d['format']
+        plt.suptitle(f"Electric Field {p}-plane at ({c[0]},{c[1]},{c[2]}) - {wl}nm")
+        plt.savefig(f'{simDIR}/DFTframes/{f}-DFT_{p}plane_X-{c[0]}_Y-{c[1]}_Z-{c[2]}_{wl}nm.png', dpi=900)
+        
+
+    #plt.imshow(np.real(np.abs(Ex**2 + Ey**2 + Ez**2)), cmap='jet', vmin=0)
+    #plt.savefig("temp.png")
