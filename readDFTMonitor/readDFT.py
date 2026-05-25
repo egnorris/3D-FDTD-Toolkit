@@ -121,14 +121,14 @@ def read_monitor_info(simDIR, v=False):
         
     return monitor_information_dict
     
-def get_availabe_wavlengths(simDIR):
+def get_available_wavelengths(simDIR):
     DFTfiles = os.listdir(f"{simDIR}/OUTPUT/DFT")
     available_wavelength_list = []
     for fn in DFTfiles:
         fn = fn.split('nm')
         fn = fn[0]
         fn = fn.split('_')
-        if fn[-1] != "Mask.cev" and fn[-1] != "phase.txt":
+        if fn[-1] != "Mask.cev" and fn[-1] != "phase.txt" and fn[-1] != "phase.txt":
             available_wavelength_list.append(int(fn[-1]))
     available_wavelength_list.sort()
     #remove duplicate wavelength values
@@ -141,13 +141,13 @@ def get_nearest_wavelength(wl, available_wavelength_list):
     return (wl, idx)
 
 
-def get_dft_file(simDIR, wavelengths, v=False):
+def get_dft_file(simDIR, wavelengths, monitor_index=None, v=False):
     """
         find all of the files in simDIR/OUTPUT/DFT 
         that match the provided wavelength and return
         the filename and coordinate information
     """
-    available_wavelength_list = get_availabe_wavlengths(simDIR)
+    available_wavelength_list = get_available_wavelengths(simDIR)
     monitor_information_dict = read_monitor_info(simDIR, v)
     
     
@@ -159,8 +159,29 @@ def get_dft_file(simDIR, wavelengths, v=False):
     dft_file_list = []
     
     for wl in wavelengths:
-        custom_monitor_index = 1
-        for k in range(len(monitor_information_dict["format"])):
+        if monitor_index == None:
+            custom_monitor_index = 1
+            for k in range(len(monitor_information_dict["format"])):
+                f = monitor_information_dict["format"][k]
+                p = monitor_information_dict["plane"][k]
+                if f == "Custom":
+                    fname = f"{simDIR}/OUTPUT/DFT/E_DFT_{custom_monitor_index}_WL_{wl}nm.cev"
+                    custom_monitor_index += 1
+                elif f == "Default":
+                    fname = f"{simDIR}/OUTPUT/DFT/E_{wl}nm_{p}.cev"
+                dft_dict = {
+                    "size": monitor_information_dict['size'][k],
+                    "center": monitor_information_dict['center'][k],
+                    "type": monitor_information_dict['type'][k],
+                    "plane": monitor_information_dict['plane'][k],
+                    "dimensions": monitor_information_dict['dimensions'][k],
+                    "format": monitor_information_dict['format'][k],
+                    "path": fname,
+                    "wavelength": wl}
+                dft_file_list.append(dft_dict)
+        else:
+            k = monitor_index
+            custom_monitor_index = k + 1
             f = monitor_information_dict["format"][k]
             p = monitor_information_dict["plane"][k]
             if f == "Custom":
@@ -289,9 +310,37 @@ def plot_dft_comp(ax, dft_file_dict, comp=None, vmin=None, vmax=None):
         cax = ax.imshow(E, cmap='jet', vmin=v0, vmax=v1, origin='lower')
         if comp == "E":
             return cax
+
+def get_dft_spectrum(simDIR, monitor_index=0, x=None, y=None, v=False):
+    monitor_information_dict = read_monitor_info(simDIR)
+    n_monitors = len(monitor_information_dict['dimensions'])
+    available_wavelength_list = get_available_wavelengths(simDIR)
+    spectrum = np.zeros((5, len(available_wavelength_list), n_monitors), dtype=np.dtype(np.complex128))
+    for n in range(n_monitors):
+        dft_file_list = get_dft_file(simDIR, available_wavelength_list, monitor_index=n, v=v)
+        for k in range(len(dft_file_list)):
+            center = dft_file_list[k]['center']
+            plane = dft_file_list[k]['plane']
+            if x == None:
+                if plane[0] == "X":
+                    x = center[0]
+                if plane[0] == "Y":
+                    x = center[1]
+            if y == None:
+                if plane[1] == "Y":
+                    y = center[1]
+                if plane[1] == "Z":
+                    y = center[2]
         
+            Ex, Ey, Ez = read_dft(dft_file_list[k])
+            E = np.real(np.abs(Ex**2 + Ey**2 + Ez**2))
+            spectrum[0, k, n] = available_wavelength_list[k]
+            spectrum[1, k, n] = Ex[x,y]
+            spectrum[2, k, n] = Ey[x,y]
+            spectrum[3, k, n] = Ez[x,y]
+            spectrum[4, k, n] = E[x,y]
         
-        
+    return spectrum
 
 
 
@@ -320,6 +369,9 @@ if __name__=="__main__":
                 print(f"{wl[i]}nm   ", end='')
         print('\n')
 
+    #spectrum = get_dft_spectrum(simDIR, monitor_index=0)
+    #plt.plot(spectrum[0, :, 0], magnitude(spectrum[4, :, 0]))
+    #plt.savefig("temp.png")
 
 
     dft_file_list =get_dft_file(simDIR, wl, v)
