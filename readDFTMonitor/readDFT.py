@@ -103,7 +103,10 @@ def read_monitor_info(simDIR, v=False):
         "plane": monitor_plane_list,
         "dimensions": monitor_dim_list,
         "format": monitor_format_list,
-        "index": monitor_index_list}
+        "index": monitor_index_list,
+        "dx": ini_data['Space Step'][0],
+        "dy": ini_data['Space Step'][1],
+        "dz": ini_data['Space Step'][2]}
 
     if v == True:
         print("\n========================================================================================================")
@@ -117,10 +120,13 @@ def read_monitor_info(simDIR, v=False):
             p = monitor_information_dict["plane"][k-1]
             d = monitor_information_dict["dimensions"][k-1]
             print(f"There is a {d}D {f} Custom Monitor in the {p}-plane")
-            print(f"    centered at ({c[0]}nm, {c[1]}nm, {c[2]}nm)")
-            print(f"    spans {s[0]}nm along x-axis")
-            print(f"    spans {s[1]}nm along y-axis")
-            print(f"    spans {s[2]}nm along z-axis")
+            print(f"    centered at cell ({c[0]}, {c[1]}, {c[2]})")
+            print(f"    spans {s[0]}cells along x-axis")
+            print(f"    spans {s[1]}cells along y-axis")
+            print(f"    spans {s[2]}cells along z-axis")
+            print(f"    cells are {np.round(ini_data['Space Step'][0]*1E9,2)} nm along x-axis")
+            print(f"    cells are {np.round(ini_data['Space Step'][1]*1E9,2)} nm along y-axis")
+            print(f"    cells are {np.round(ini_data['Space Step'][2]*1E9,2)} nm along z-axis")
 
         
     return monitor_information_dict
