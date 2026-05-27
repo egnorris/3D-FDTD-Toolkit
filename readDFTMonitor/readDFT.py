@@ -44,11 +44,13 @@ def read_monitor_info(simDIR, v=False):
     monitor_plane_list = []
     monitor_dim_list = []
     monitor_format_list = []
+    monitor_index_list = []
     for n in range(num_custom_monitors):
         size = mon_data["Monitors"][n]["Size"]
         monitor_size_list.append(size)
         monitor_center_list.append(mon_data["Monitors"][n]["Center"])
         monitor_type_list.append(mon_data["Monitors"][n]["Type"])
+        monitor_index_list.append(n+1)
         temp = [i for i, x in enumerate(size) if x != 1]
         plane = ''
         for i in range(len(temp)):
@@ -79,6 +81,7 @@ def read_monitor_info(simDIR, v=False):
             monitor_plane_list.append(planes[n])
             monitor_dim_list.append(2)
             monitor_format_list.append("Default")
+            monitor_index_list.append(-1)
     elif num_default_monitors == 1:
         x,y,z = default_monitor_size
         p = planes[ini_data["DFT Plot"]-1]
@@ -99,7 +102,8 @@ def read_monitor_info(simDIR, v=False):
         "type": monitor_type_list,
         "plane": monitor_plane_list,
         "dimensions": monitor_dim_list,
-        "format": monitor_format_list}
+        "format": monitor_format_list,
+        "index": monitor_index_list}
 
     if v == True:
         print("\n========================================================================================================")
@@ -139,6 +143,19 @@ def get_nearest_wavelength(wl, available_wavelength_list):
     wl = min(available_wavelength_list, key=lambda x:abs(x-wl))
     idx = available_wavelength_list.index(wl)
     return (wl, idx)
+
+def extract_wavelength(f):
+    f = f.split('_')
+    if len(f) == 3:
+        wl = f[1]
+        wl = wl.split('nm')[0]
+        return wl
+
+    else:
+        wl = f[4]
+        wl = wl.split('.')[0]
+        wl = wl.split('nm')[0]
+        return wl
 
 
 def get_dft_file(simDIR, wavelengths, monitor_index=None, v=False):
